@@ -10,3 +10,29 @@ INFO:     127.0.0.1:56215 - "GET /trips HTTP/1.1" 200 OK
 2026-11-18 16:15:50,447 | INFO | POST /predict/00000077 - request received
 2026-11-18 16:15:53,744 | INFO | POST /predict/00000077 - 3911 points, inference 2.86s, evaluation={'top1_accuracy_hmm': 0.8844, 'top1_accuracy_classifier_only': 0.6998, 'route_continuity': 0.9928, 'route_precision': 0.9088, 'route_recall': 0.9664, 'route_f1': 0.9367}
 INFO:     127.0.0.1:56215 - "POST /predict/00000077 HTTP/1.1" 200 OK
+2026-11-18 16:16:33,675 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:54875 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:16:46,862 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:51824 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:16:49,486 | INFO | POST /predict/00000000 - request received
+2026-11-18 16:16:52,013 | INFO | POST /predict/00000000 - 2503 points, inference 2.30s, evaluation={'top1_accuracy_hmm': 0.9656, 'top1_accuracy_classifier_only': 0.9365, 'route_continuity': 0.996, 'route_precision': 0.9243, 'route_recall': 0.9553, 'route_f1': 0.9396}
+INFO:     127.0.0.1:51824 - "POST /predict/00000000 HTTP/1.1" 200 OK
+2026-11-18 16:17:04,917 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:49984 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:17:07,847 | INFO | POST /predict/00000007 - request received
+2026-11-18 16:17:08,603 | INFO | POST /predict/00000007 - 1354 points, inference 0.67s, evaluation={'top1_accuracy_hmm': 0.9993, 'top1_accuracy_classifier_only': 0.9424, 'route_continuity': 1.0, 'route_precision': 1.0, 'route_recall': 0.9837, 'route_f1': 0.9918}
+INFO:     127.0.0.1:49984 - "POST /predict/00000007 HTTP/1.1" 200 OK
+2026-11-18 16:17:16,587 | INFO | POST /predict/00000009 - request received
+2026-11-18 16:17:17,473 | INFO | POST /predict/00000009 - 1049 points, inference 0.84s, evaluation={'top1_accuracy_hmm': 0.9094, 'top1_accuracy_classifier_only': 0.8551, 'route_continuity': 0.9418, 'route_precision': 0.9342, 'route_recall': 0.8275, 'route_f1': 0.8776}
+INFO:     127.0.0.1:51759 - "POST /predict/00000009 HTTP/1.1" 200 OK
+2026-11-18 16:18:11,373 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:56566 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:18:12,775 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:56566 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60018 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60018 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58577 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58577 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58577 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65330 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65330 - "GET /openapi.json HTTP/1.1" 200 OK
