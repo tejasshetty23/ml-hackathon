@@ -1,0 +1,35 @@
+train rows=1085227 (pos rate 0.169), student-test rows=113694
+
+=== LogisticRegression
+  fold 0: macroF1=0.8742 top1=0.8117 (4.9s fit)
+  fold 1: macroF1=0.8977 top1=0.8647 (8.1s fit)
+  fold 2: macroF1=0.8683 top1=0.8181 (7.0s fit)
+  fold 3: macroF1=0.9063 top1=0.5800 (7.7s fit)
+  fold 4: macroF1=0.8207 top1=0.6549 (8.5s fit)
+  student-test: macroF1=0.8871 top1=0.8381 logloss=0.1754 continuity=0.9111
+
+=== DecisionTree
+  fold 0: macroF1=0.8974 top1=0.8238 (49.5s fit)
+  fold 1: macroF1=0.9199 top1=0.8709 (45.6s fit)
+  fold 2: macroF1=0.8885 top1=0.8227 (43.0s fit)
+  fold 3: macroF1=0.9213 top1=0.5858 (45.8s fit)
+  fold 4: macroF1=0.8426 top1=0.6629 (48.8s fit)
+  student-test: macroF1=0.9086 top1=0.8515 logloss=0.1292 continuity=0.9205
+
+=== RandomForest
+  fold 0: macroF1=0.8994 top1=0.8232 (87.8s fit)
+  fold 1: macroF1=0.9251 top1=0.8790 (94.6s fit)
+  fold 2: macroF1=0.8900 top1=0.8305 (100.9s fit)
+  fold 3: macroF1=0.9241 top1=0.5868 (85.7s fit)
+  fold 4: macroF1=0.8487 top1=0.6637 (58.6s fit)
+  student-test: macroF1=0.9096 top1=0.8531 logloss=0.1232 continuity=0.9197
+
+=== XGBoost
+  fold 0: macroF1=0.9015 top1=0.8249 (1444.4s fit)
+  fold 1: macroF1=0.9244 top1=0.8788 (83.0s fit)
+  fold 2: macroF1=0.8929 top1=0.8345 (60.2s fit)
+  fold 3: macroF1=0.9260 top1=0.5901 (95.6s fit)
+  fold 4: macroF1=0.8515 top1=0.6651 (68.8s fit)
+  student-test: macroF1=0.9111 top1=0.8546 logloss=0.1198 continuity=0.9233
+
+Reference-route continuity on student-test (ceiling): 0.9848

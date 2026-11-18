@@ -1,0 +1,3 @@
+partition,trips,gps_points,median_points,median_arcs,missing_values,trips_with_gap_over_60s
+student_test,10,19160,1420.0,13145.0,0,1
+train,80,208417,1529.0,19526.5,0,22

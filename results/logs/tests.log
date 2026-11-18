@@ -1,0 +1,6 @@
+OK  LogisticRegression: loaded, mean prob on 2000 test rows = 0.2677
+OK  KNN: loaded, mean prob on 2000 test rows = 0.2708
+OK  DecisionTree: loaded, mean prob on 2000 test rows = 0.2681
+OK  RandomForest: loaded, mean prob on 2000 test rows = 0.2700
+OK  XGBoost: loaded, mean prob on 2000 test rows = 0.2694
+OK  preprocessing is deterministic; positives per point max = 2

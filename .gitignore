@@ -1,0 +1,5 @@
+# raw dataset and generated feature tables (large; rebuild with: py -3.13 -m preprocessing.pipeline)
+data/raw/
+data/processed/
+__pycache__/
+*.pyc
