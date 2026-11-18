@@ -1,7 +1,7 @@
 """PathSnap FastAPI backend (Laptop 1).
 
 Run (from the PathSnap folder):
-    set PATHSNAP_DATA_DIR=data/evaluator          (folder with one sub-folder per trip; default: data/raw/student_test)
+    set PATHSNAP_DATA_DIR=data/evaluator_test     (folder with one sub-folder per trip; default: data/raw/student_test)
     py -3.13 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 
 Endpoints:  GET /health   GET /trips   POST /predict/{trip_id}
@@ -12,6 +12,7 @@ import os, json, time, logging
 import numpy as np
 import joblib
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from preprocessing.pipeline import read_trip_files, clean_track, candidates_and_features, route_labels, FEATURES
 from models.hmm import RoadGraph, prepare_trip, viterbi
@@ -28,6 +29,8 @@ log = logging.getLogger("pathsnap")
 log.info(f"model={CFG['model_name']}  hmm={HMM}  data_dir={DATA_DIR}")
 
 app = FastAPI(title="PathSnap API", version="1.0")
+# the browser UI (ui/index.html) runs on Laptop 2, i.e. a different origin -> allow cross-origin GET/POST
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
 def list_trips():

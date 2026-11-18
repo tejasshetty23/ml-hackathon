@@ -1,0 +1,148 @@
+<!doctype html>
+<!--
+  PathSnap evaluator UI (Laptop 2). Plain HTML + JavaScript; talks only to the API (no model, no ground truth).
+  Run:  py -3.13 -m http.server 8501 --directory ui      then open http://localhost:8501
+        (or just double-click this file). API address: field at the top, or ?api=http://<laptop-1-ip>:8000
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PathSnap</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --text:#1d2330; --muted:#667085; --accent:#d92d20; --border:#e4e7ec; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+  header { background:#1d2330; color:#fff; padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  header h1 { font-size:20px; margin:0; font-weight:650; }
+  header .sub { color:#c7cbd4; font-size:13px; }
+  main { max-width:1300px; margin:0 auto; padding:18px 24px; }
+  .controls { display:flex; gap:12px; align-items:end; flex-wrap:wrap; background:var(--card); border:1px solid var(--border);
+              border-radius:10px; padding:14px 16px; }
+  label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  input, select { font-size:14px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:#fff; }
+  #api { width:260px; } #trip { width:160px; }
+  button { font-size:14px; padding:9px 18px; border:0; border-radius:6px; background:var(--accent); color:#fff; cursor:pointer; font-weight:600; }
+  button:disabled { opacity:.5; cursor:wait; }
+  #status { font-size:13px; color:var(--muted); margin-left:4px; align-self:center; }
+  #status.err { color:#b42318; }
+  .cards { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:12px; margin:16px 0; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .card .k { font-size:12px; color:var(--muted); }
+  .card .v { font-size:24px; font-weight:650; margin-top:4px; font-variant-numeric: tabular-nums; }
+  #map { height:600px; border-radius:10px; border:1px solid var(--border); }
+  .legend { background:#fff; padding:6px 10px; border-radius:6px; font-size:13px; line-height:1.6; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#1f5fd6; margin-right:6px; }
+  .bar { display:inline-block; width:16px; height:4px; background:var(--accent); margin-right:6px; vertical-align:middle; }
+  details { margin-top:14px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 14px; }
+  pre { font-size:12px; overflow:auto; margin:8px 0 0; }
+  @media (max-width: 900px) { .cards { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>PathSnap</h1><span class="sub">map-matching and route reconstruction &middot; XGBoost + HMM/Viterbi</span>
+</header>
+<main>
+  <div class="controls">
+    <div><label for="api">API address (Laptop 1)</label><input id="api" value="http://localhost:8000"></div>
+    <div><label for="trip">Evaluation trip</label><select id="trip"></select></div>
+    <button id="connect" type="button" style="background:#475467">Load trips</button>
+    <button id="run" type="button" disabled>Reconstruct route</button>
+    <span id="status"></span>
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="k">GPS points</div><div class="v" id="m-points">-</div></div>
+    <div class="card"><div class="k">Top-1 accuracy (HMM)</div><div class="v" id="m-hmm">-</div></div>
+    <div class="card"><div class="k">Top-1 (classifier only)</div><div class="v" id="m-cls">-</div></div>
+    <div class="card"><div class="k">Route continuity</div><div class="v" id="m-cont">-</div></div>
+    <div class="card"><div class="k">Route F1</div><div class="v" id="m-f1">-</div></div>
+    <div class="card"><div class="k">API inference time</div><div class="v" id="m-time">-</div></div>
+  </div>
+
+  <div id="map"></div>
+  <details><summary>Raw API response (metrics only)</summary><pre id="raw">-</pre></details>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const pct = x => (x === undefined || x === null) ? "n/a" : (100 * x).toFixed(2) + "%";
+const params = new URLSearchParams(location.search);
+if (params.get("api")) $("api").value = params.get("api");
+const apiBase = () => $("api").value.trim().replace(/\/+$/, "");
+
+const map = L.map("map").setView([20, 0], 2);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  { maxZoom: 19, attribution: "&copy; OpenStreetMap contributors" }).addTo(map);
+const gpsLayer = L.layerGroup().addTo(map);
+const routeLayer = L.layerGroup().addTo(map);
+L.control.layers(null, { "GPS observations": gpsLayer, "Predicted route": routeLayer }, { collapsed: false }).addTo(map);
+const legend = L.control({ position: "bottomleft" });
+legend.onAdd = () => { const d = L.DomUtil.create("div", "legend");
+  d.innerHTML = '<span class="dot"></span>GPS observations<br><span class="bar"></span>Predicted route'; return d; };
+legend.addTo(map);
+
+function setStatus(msg, err = false) { $("status").textContent = msg; $("status").className = err ? "err" : ""; }
+
+async function loadTrips() {
+  setStatus("Connecting to " + apiBase() + " ...");
+  $("run").disabled = true;
+  try {
+    const r = await fetch(apiBase() + "/trips");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const trips = (await r.json()).trips;
+    $("trip").innerHTML = trips.map(t => `<option>${t}</option>`).join("");
+    if (params.get("trip") && trips.includes(params.get("trip"))) $("trip").value = params.get("trip");
+    $("run").disabled = trips.length === 0;
+    setStatus(trips.length + " trips available");
+    return trips;
+  } catch (e) {
+    setStatus("Cannot reach the API: " + e.message, true);
+    return [];
+  }
+}
+
+async function run() {
+  const trip = $("trip").value;
+  $("run").disabled = true;
+  setStatus("Sending trip " + trip + " to the API ...");
+  try {
+    const r = await fetch(apiBase() + "/predict/" + encodeURIComponent(trip), { method: "POST" });
+    if (!r.ok) throw new Error("HTTP " + r.status + " " + (await r.text()));
+    show(await r.json());
+    setStatus("Trip " + trip + " done");
+  } catch (e) {
+    setStatus("API error: " + e.message, true);
+  } finally {
+    $("run").disabled = false;
+  }
+}
+
+function show(res) {
+  const ev = res.evaluation || {};
+  $("m-points").textContent = res.gps_points;
+  $("m-hmm").textContent = pct(ev.top1_accuracy_hmm);
+  $("m-cls").textContent = pct(ev.top1_accuracy_classifier_only);
+  $("m-cont").textContent = pct(ev.route_continuity);
+  $("m-f1").textContent = pct(ev.route_f1);
+  $("m-time").textContent = res.inference_seconds.toFixed(2) + " s";
+  gpsLayer.clearLayers(); routeLayer.clearLayers();
+  const step = Math.max(1, Math.floor(res.gps.length / 3000));
+  res.gps.filter((_, i) => i % step === 0).forEach(p =>
+    L.circleMarker(p, { radius: 2, color: "#1f5fd6", weight: 1, fillOpacity: 0.6, opacity: 0.6 }).addTo(gpsLayer));
+  res.predicted_route.forEach(seg => L.polyline(seg, { color: "#d92d20", weight: 4, opacity: 0.85 }).addTo(routeLayer));
+  map.fitBounds(L.latLngBounds(res.gps), { padding: [20, 20] });
+  const { gps, predicted_route, ...rest } = res;
+  $("raw").textContent = JSON.stringify(rest, null, 2);
+}
+
+$("connect").onclick = loadTrips;
+$("run").onclick = run;
+loadTrips().then(trips => { if (params.get("trip") && trips.includes(params.get("trip"))) run(); });
+</script>
+</body>
+</html>

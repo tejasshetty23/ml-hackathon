@@ -1,20 +1,12 @@
-2026-11-18 16:06:32,356 | INFO | model=XGBoost  hmm={'beta': 5.0, 'w_emission': 0.5, 'gap_s': 60.0}  data_dir=data/raw/student_test
-INFO:     Started server process [36076]
+2026-11-18 16:15:45,705 | INFO | model=XGBoost  hmm={'beta': 5.0, 'w_emission': 0.5, 'gap_s': 60.0}  data_dir=data/raw/student_test
+INFO:     Started server process [14028]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:52710 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52715 - "GET /health HTTP/1.1" 200 OK
-2026-11-18 16:07:16,832 | INFO | GET /trips -> 10 trips
-INFO:     127.0.0.1:56505 - "GET /trips HTTP/1.1" 200 OK
-2026-11-18 16:07:18,912 | INFO | POST /predict/00000077 - request received
-2026-11-18 16:07:20,156 | INFO | POST /predict/00000077 - 3911 points, inference 1.13s, evaluation={'top1_accuracy_hmm': 0.8844, 'top1_accuracy_classifier_only': 0.6998, 'route_continuity': 0.9928, 'route_precision': 0.9088, 'route_recall': 0.9664, 'route_f1': 0.9367}
-INFO:     127.0.0.1:56507 - "POST /predict/00000077 HTTP/1.1" 200 OK
-2026-11-18 16:07:43,866 | INFO | GET /trips -> 10 trips
-INFO:     127.0.0.1:56562 - "GET /trips HTTP/1.1" 200 OK
-2026-11-18 16:07:45,916 | INFO | POST /predict/00000077 - request received
-2026-11-18 16:07:47,152 | INFO | POST /predict/00000077 - 3911 points, inference 1.13s, evaluation={'top1_accuracy_hmm': 0.8844, 'top1_accuracy_classifier_only': 0.6998, 'route_continuity': 0.9928, 'route_precision': 0.9088, 'route_recall': 0.9664, 'route_f1': 0.9367}
-INFO:     127.0.0.1:56564 - "POST /predict/00000077 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:60828 - "GET /health HTTP/1.1" 200 OK
-2026-11-18 16:13:12,237 | INFO | GET /trips -> 10 trips
-INFO:     127.0.0.1:59732 - "GET /trips HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62603 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54289 - "OPTIONS /predict/00000077 HTTP/1.1" 200 OK
+2026-11-18 16:15:50,429 | INFO | GET /trips -> 10 trips
+INFO:     127.0.0.1:56215 - "GET /trips HTTP/1.1" 200 OK
+2026-11-18 16:15:50,447 | INFO | POST /predict/00000077 - request received
+2026-11-18 16:15:53,744 | INFO | POST /predict/00000077 - 3911 points, inference 2.86s, evaluation={'top1_accuracy_hmm': 0.8844, 'top1_accuracy_classifier_only': 0.6998, 'route_continuity': 0.9928, 'route_precision': 0.9088, 'route_recall': 0.9664, 'route_f1': 0.9367}
+INFO:     127.0.0.1:56215 - "POST /predict/00000077 HTTP/1.1" 200 OK

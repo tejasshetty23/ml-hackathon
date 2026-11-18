@@ -68,7 +68,7 @@ pdf.h1("1. Problem and approach")
 pdf.p("Noisy GPS points must be matched to the road segment (arc) that the vehicle actually drove on. Pipeline: "
       "(1) for each GPS point, collect nearby arcs as candidates; (2) a classifier scores each (point, candidate) pair; "
       "(3) an HMM with Viterbi decoding chooses the most likely connected sequence of arcs; (4) a FastAPI backend runs "
-      "this for a selected trip and a Streamlit UI shows the result. Final system: "
+      "this for a selected trip and a browser UI (HTML + JavaScript, Leaflet) shows the result. Final system: "
       f"{cfg['model_name']} + HMM (beta = {cfg['hmm']['beta']:g} m, emission weight = {cfg['hmm']['w_emission']:g}).")
 
 # ---------------- 2. dataset ----------------
@@ -257,9 +257,9 @@ pdf.p("Laptop 1 runs `uvicorn api.main:app --host 0.0.0.0 --port 8000`. It loads
       "GET /trips, POST /predict/{trip_id}. For each request the API runs cleaning -> candidates -> features -> "
       "classifier -> HMM/Viterbi using only .track/.nodes/.arcs, then (server-side) aligns the .route file to compute "
       "Top-1 accuracy, continuity and route precision/recall/F1. The response contains the GPS points, the predicted "
-      "route and the metrics - never the reference route. Laptop 2 runs `streamlit run ui/app.py`, lists the trips "
+      "route and the metrics - never the reference route. Laptop 2 opens ui/index.html (plain HTML + JavaScript with Leaflet maps, served with `python -m http.server`), lists the trips "
       "from the API, sends the selected trip id and draws the returned route.")
-pdf.img(f"{PLOTS}/ui_screenshot.png", 170, "Figure: Streamlit UI showing a reconstructed student-test trip "
+pdf.img(f"{PLOTS}/ui_screenshot.png", 170, "Figure: browser UI (ui/index.html) showing a reconstructed student-test trip "
         "returned by the API.")
 if api_log:
     lines = [l for l in api_log.splitlines() if "pathsnap" in l.lower() or "POST" in l or "GET" in l][-8:]
@@ -280,7 +280,7 @@ pdf.grid([["Member", "Responsibility"],
           ["Member 1", "Data exploration, loading, cleaning, road network, labels, candidates, features"],
           ["Member 2", "Logistic Regression and KNN; FastAPI backend"],
           ["Member 3", "Decision Tree and Random Forest; HMM/Viterbi decoder"],
-          ["Member 4", "XGBoost, Bayesian optimisation, comparison, graphs, Streamlit UI, report"]], [30, 150])
+          ["Member 4", "XGBoost, Bayesian optimisation, comparison, graphs, web UI, report"]], [30, 150])
 
 pdf.output("reports/PathSnap_Technical_Report.pdf")
 print("wrote reports/PathSnap_Technical_Report.pdf, pages:", pdf.page_no())

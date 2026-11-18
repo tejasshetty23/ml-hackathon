@@ -1,14 +1,68 @@
-2026-11-18 16:06:38.025 Uvicorn server started on 0.0.0.0:8501
-
-  You can now view your Streamlit app in your browser.
-
-  Local URL: http://localhost:8501
-  Network URL: http://10.20.202.189:8501
-  External URL: http://223.31.218.223:8501
-
-2026-11-18 16:07:22.025 Please replace `st.components.v1.html` with `st.iframe`.
-
-`st.components.v1.html` will be removed after 2026-06-01.
-2026-11-18 16:07:48.939 Please replace `st.components.v1.html` with `st.iframe`.
-
-`st.components.v1.html` will be removed after 2026-06-01.
+::1 - - [18/Nov/2026 16:15:43] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:43] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:43] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:43] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:46] "GET / HTTP/1.1" 200 -
+::1 - - [18/Nov/2026 16:15:46] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:46] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:46] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:46] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:49] "GET /?trip=00000077 HTTP/1.1" 200 -
+::1 - - [18/Nov/2026 16:15:49] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:49] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:49] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:49] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:50] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:50] "GET /favicon.ico HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:52] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:52] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:52] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:52] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:55] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:55] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:55] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:55] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:58] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:58] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:15:58] code 404, message File not found
+::1 - - [18/Nov/2026 16:15:58] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:01] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:01] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:01] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:01] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:04] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:04] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:04] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:04] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:07] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:07] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:07] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:07] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:10] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:10] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:10] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:10] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:13] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:13] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:13] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:13] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:16] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:16] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:16] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:16] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:19] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:19] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:19] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:19] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:22] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:22] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:22] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:22] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:25] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:25] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:25] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:25] "GET /_stcore/health HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:28] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:28] "GET /_stcore/host-config HTTP/1.1" 404 -
+::1 - - [18/Nov/2026 16:16:28] code 404, message File not found
+::1 - - [18/Nov/2026 16:16:28] "GET /_stcore/health HTTP/1.1" 404 -

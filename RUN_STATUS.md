@@ -12,7 +12,7 @@
 | XGBoost train/val loss curve | done | `xgb_learning_curve.csv`, `plots/xgb_learning_curve.png` |
 | Folium maps (all 10 student-test trips) | done | `results/maps/trip_<id>_map.html` |
 | FastAPI backend | done, tested | `api/main.py`, log `results/logs/api_server.log` |
-| Streamlit UI | done, tested | `ui/app.py`, `plots/ui_screenshot.png` |
+| Web UI (HTML + JavaScript + Leaflet) | done, tested | `ui/index.html`, `plots/ui_screenshot.png` |
 | Tests | pass | `results/logs/tests.log` |
 | Technical report | done | `reports/PathSnap_Technical_Report.pdf` (6 pages) |
 

@@ -3,7 +3,7 @@
 Noisy GPS points are matched to the road segments (arcs) the vehicle actually drove on.
 For every GPS point we collect nearby road arcs (candidates), compute features, and a classifier scores each
 candidate. An HMM with Viterbi decoding then picks the most likely *connected* sequence of arcs. A FastAPI backend
-(Laptop 1) runs the whole pipeline; a Streamlit UI (Laptop 2) lets the evaluator pick a trip and shows the result.
+(Laptop 1) runs the whole pipeline; a browser UI (Laptop 2, plain HTML + JavaScript) lets the evaluator pick a trip and shows the result.
 
 ## 1. Installation
 ```
@@ -36,13 +36,14 @@ py -3.13 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
 Without `PATHSNAP_DATA_DIR` the API serves the 10 student-testing trips. Every request is logged in this window
 (show these logs to the evaluator). Find the laptop's IP with `ipconfig` and allow port 8000 in the Windows firewall.
 
-**Laptop 2 — UI** (needs only `ui/app.py` and `pip install streamlit requests folium`):
+**Laptop 2 — UI** (needs only the file `ui/index.html` and a browser; Python is optional):
 ```
-set PATHSNAP_API=http://<laptop-1-ip>:8000
-py -3.13 -m streamlit run ui/app.py
+py -3.13 -m http.server 8501 --directory ui
 ```
-The UI lists the trips from the API, sends the selected trip id to `POST /predict/{trip_id}` and shows the predicted
-route on a map with the accuracy computed by the API. Ground truth never leaves Laptop 1.
+Open `http://localhost:8501/?api=http://<laptop-1-ip>:8000` (or double-click `ui/index.html` and type the API
+address in the box). The page lists the trips from the API, sends the selected trip id to `POST /predict/{trip_id}`
+and draws the predicted route (Leaflet map) with the accuracy computed by the API. Ground truth never leaves Laptop 1.
+On a single laptop just open `http://localhost:8501` (default API address `http://localhost:8000`).
 
 API endpoints: `GET /health`, `GET /trips`, `POST /predict/{trip_id}`.
 
@@ -53,7 +54,7 @@ API endpoints: `GET /health`, `GET /trips`, `POST /predict/{trip_id}`.
 | `training/` | `train_models.py` (5 models), `tune_bayes.py` (Optuna), `xgb_learning_curve.py` |
 | `models/hmm.py` | HMM + Viterbi decoder |
 | `evaluation/hmm_eval.py` | decoder tuning, classifier-only vs HMM comparison |
-| `api/main.py`, `ui/app.py` | FastAPI backend, Streamlit UI |
+| `api/main.py`, `ui/index.html` | FastAPI backend, browser UI (HTML + JavaScript + Leaflet) |
 | `visualisation/make_plots.py` | EDA plots, comparison graphs, Folium maps |
 | `reports/build_report.py` | builds the PDF from the result files |
 | `artifacts/` | saved models + `final_config.json` (model file + HMM parameters used by the API) |

@@ -2,7 +2,7 @@
 
 All four members must be able to explain the full pipeline:
 raw files → cleaning → monotone route alignment (labels) → 50 m / top-8 candidates → 12 features → classifier
-→ HMM/Viterbi → FastAPI → Streamlit UI.
+→ HMM/Viterbi → FastAPI → browser UI (HTML + JavaScript).
 
 ## Member 1 — Data and preprocessing
 - Dataset exploration and inventory (`visualisation/make_plots.py: dataset_summary`, `results/metrics/dataset_*.csv`)
@@ -24,4 +24,4 @@ raw files → cleaning → monotone route alignment (labels) → 50 m / top-8 ca
 ## Member 4 — XGBoost, optimisation, comparison and UI
 - `MODELS["XGBoost"]`, Bayesian optimisation `training/tune_bayes.py`, learning curve `training/xgb_learning_curve.py`
 - Metrics, comparison CSVs, graphs, Folium maps (`visualisation/make_plots.py`)
-- Streamlit UI `ui/app.py`, PDF report `reports/build_report.py`
+- Web UI `ui/index.html` (HTML + JavaScript + Leaflet), PDF report `reports/build_report.py`
