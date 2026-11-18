@@ -13,11 +13,21 @@
 ## Results (from `results/metrics/model_comparison.csv`)
 | Model | CV Macro F1 (mean ± std) | CV Top-1 | Test Top-1 | Test Macro F1 | Test Precision | Test Recall | Test Log Loss | Test Route continuity | Inference ms/point |
 |---|---|---|---|---|---|---|---|---|---|
-| Logistic Regression | 0.8735 ± 0.033 | 0.7459 | 0.8381 | 0.8871 | 0.8215 | 0.8020 | 0.1754 | 0.9111 | 0.004 |
-| KNN | 0.8839 ± 0.032 | 0.7439 | 0.8427 | 0.9026 | 0.8589 | 0.8164 | 0.2231 | 0.9134 | 4.423 |
-| Decision Tree | 0.8939 ± 0.032 | 0.7532 | 0.8515 | 0.9086 | 0.8526 | 0.8429 | 0.1292 | 0.9205 | 0.005 |
-| Random Forest | 0.8975 ± 0.031 | 0.7566 | 0.8531 | 0.9096 | 0.8799 | 0.8193 | 0.1232 | 0.9197 | 0.062 |
-| **XGBoost** | **0.8993 ± 0.030** | **0.7587** | **0.8546** | **0.9111** | 0.8680 | 0.8356 | **0.1198** | **0.9233** | 0.049 |
+| Logistic Regression | 0.8735 ± 0.033 | 0.7459 | 0.8381 | 0.8871 | 0.8215 | 0.8020 | 0.1754 | 0.9111 | 0.001 |
+| KNN | 0.8839 ± 0.032 | 0.7439 | 0.8427 | 0.9026 | 0.8589 | 0.8164 | 0.2231 | 0.9134 | 0.840 |
+| Decision Tree | 0.8939 ± 0.032 | 0.7532 | 0.8515 | 0.9086 | 0.8526 | 0.8429 | 0.1292 | 0.9205 | 0.001 |
+| Random Forest | 0.8975 ± 0.031 | 0.7566 | 0.8531 | 0.9096 | 0.8799 | 0.8193 | 0.1232 | 0.9197 | 0.022 |
+| **XGBoost** | **0.8993 ± 0.030** | **0.7587** | **0.8546** | **0.9111** | 0.8680 | 0.8356 | **0.1198** | **0.9233** | 0.020 |
+
+Training time (clean sequential run, 8-core laptop, nothing else running):
+
+| Model | Mean CV fold fit (s) | Final fit on all 80 trips (s) |
+|---|---|---|
+| Logistic Regression | 2.9 | 2.8 |
+| KNN (50k-row sample, lazy learner) | 0.06 | 0.04 |
+| Decision Tree | 9.4 | 11.6 |
+| Random Forest | 35.4 | 54.0 |
+| XGBoost | 27.1 | 37.8 |
 
 - Reference-route continuity on student_test (ceiling of the continuity metric): 0.9848.
 - Top-1 ceiling on student_test = 1 − miss rate = 0.9959.
@@ -29,7 +39,7 @@
 - Metrics: `results/metrics/model_comparison.csv`, `cv_results.csv`, `student_test_results.csv`,
   `dataset_inventory.csv`, `dataset_summary.csv`, `confusion_*.npy`, `student_test_predictions_*.csv`
 - Plots: `results/plots/` · Map: `results/maps/trip_00000000_map.html` · Report: `reports/PathSnap_First_Evaluation.pdf`
-- Logs: `results/logs/preprocessing.log`, `training.log` (LR, DT, RF, XGB), `training_knn.log` (KNN), `plots.log`, `tests.log`
+- Logs: `results/logs/preprocessing.log`, `training.log` (all 5 models, sequential run), `plots.log`, `tests.log`
 
 ## Reproduce (from `PathSnap/`)
 ```
@@ -42,9 +52,8 @@ py -3.13 -m reports.build_report
 ```
 
 ## Known issues / honest notes
-- Training times are **not clean benchmarks**: KNN ran in parallel with the other models, which slowed
-  Decision Tree (66 s) and Random Forest; XGBoost fold 0 took 1444 s (the machine apparently stalled/slept) while the
-  other XGBoost folds took 60–96 s. Re-run models one at a time for fair timing.
+- Timings come from a clean sequential re-run (all 5 models one after another). An earlier run had KNN running in
+  parallel and inflated times; the re-run reproduced every accuracy/F1/log-loss value exactly (fixed seeds).
 - KNN is fitted on a 50,000-row random subsample (brute-force search) for speed.
 - The "train" overfitting check scores each refit model on 20 random training trips, not all 80.
 - Labels come from our alignment to the supplied route (reference information, not verified ground truth).
