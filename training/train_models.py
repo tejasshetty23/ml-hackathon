@@ -95,10 +95,12 @@ def main():
     for name in names:
         family, make = MODELS[name]
         print(f"\n=== {name}", flush=True)
+        oof = np.zeros(len(tr))  # out-of-fold probability for every training row
         for k, (a, b) in enumerate(folds):
             m = make()
             fit_s = fit(name, m, Xtr[a], ytr[a])
             t0 = time.time(); p = m.predict_proba(Xtr[b])[:, 1]; inf_s = time.time() - t0
+            oof[b] = p
             val = tr.iloc[b]
             met, _, _ = evaluate(val, tr_pts[tr_pts.trip.isin(val.trip.unique())], p)
             cv_rows.append({"model": name, "fold": k, "train_time_s": fit_s, "inference_time_s": inf_s, **met})
@@ -108,11 +110,14 @@ def main():
         fit_s = fit(name, m, Xtr, ytr)
         t0 = time.time(); p = m.predict_proba(Xte)[:, 1]; inf_s = time.time() - t0
         met, cm, top1 = evaluate(te, te_pts, p)
-        # training-set score (for the overfitting check) on 20 random training trips to save time
+        # overfitting check on the SAME 20 random training trips: score of the refit model (trips seen in training)
+        # vs out-of-fold score (same trips, predicted by the fold model that did not see them)
         sub_trips = np.random.default_rng(SEED).choice(tr.trip.unique(), 20, replace=False)
-        tr_sub = tr[tr.trip.isin(sub_trips)]
-        p_tr = m.predict_proba(tr_sub[FEATURES].values)[:, 1]
-        tr_met, _, _ = evaluate(tr_sub, tr_pts[tr_pts.trip.isin(sub_trips)], p_tr)
+        sel = tr.trip.isin(sub_trips).values
+        tr_sub, pts_sub = tr[sel], tr_pts[tr_pts.trip.isin(sub_trips)]
+        tr_met, _, _ = evaluate(tr_sub, pts_sub, m.predict_proba(tr_sub[FEATURES].values)[:, 1])
+        oof_met, _, _ = evaluate(tr_sub, pts_sub, oof[sel])
+        np.save(f"data/processed/oof_{name}.npy", oof)  # out-of-fold probabilities (used to tune the HMM)
         joblib.dump(m, f"artifacts/models/{name}.joblib")
         np.save(f"results/metrics/confusion_{name}.npy", cm)
         top1[["trip", "point", "arc", "p"]].to_csv(f"results/metrics/student_test_predictions_{name}.csv", index=False)
@@ -124,6 +129,7 @@ def main():
             "cv_macro_f1_mean": cv.macro_f1.mean(), "cv_macro_f1_std": cv.macro_f1.std(),
             "cv_top1_mean": cv.top1_accuracy.mean(), "cv_log_loss_mean": cv.log_loss.mean(),
             "train_macro_f1": tr_met["macro_f1"], "train_top1": tr_met["top1_accuracy"],
+            "oof_macro_f1_same_trips": oof_met["macro_f1"], "oof_top1_same_trips": oof_met["top1_accuracy"],
             "test_accuracy": met["accuracy"], "test_precision": met["precision"], "test_recall": met["recall"],
             "test_macro_f1": met["macro_f1"], "test_top1": met["top1_accuracy"], "test_log_loss": met["log_loss"],
             "test_route_continuity": met["route_continuity"], "candidate_miss_rate": met["candidate_miss_rate"],

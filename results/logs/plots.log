@@ -4,5 +4,6 @@ student_test     10       19160  ...               0                        1
 train            80      208417  ...               0                       22
 
 [2 rows x 6 columns]
-plots -> results/plots  map -> results/maps
 map screenshot -> C:\Users\tejas\OneDrive\Desktop\ml hackathon\PathSnap\results\plots\folium_trip_00000000.png
+map screenshot -> C:\Users\tejas\OneDrive\Desktop\ml hackathon\PathSnap\results\plots\folium_trip_00000077.png
+plots -> results/plots  maps -> results/maps  largest HMM change: 00000077

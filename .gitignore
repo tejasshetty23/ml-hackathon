@@ -1,5 +1,7 @@
-# raw dataset and generated feature tables (large; rebuild with: py -3.13 -m preprocessing.pipeline)
+# raw datasets and generated feature tables (large; rebuild with: py -3.13 -m preprocessing.pipeline)
 data/raw/
 data/processed/
+# evaluator trips: only placed on Laptop 1 for the final demo, never committed
+data/evaluator_test/
 __pycache__/
 *.pyc

@@ -42,7 +42,7 @@ def dataset_summary():
     allgaps = np.concatenate([np.diff(load_trip(d)[1].t.values) for d in sorted(glob.glob(f"{RAW}/train/*"))])
     ax[1].hist(np.clip(allgaps, 0, 30), bins=30, color="#4C72B0", log=True)
     ax[1].set(title="Time between GPS points (train, clipped at 30 s)", xlabel="seconds", ylabel="count (log)")
-    pts = pd.read_parquet("data/processed/train_points.parquet")
+    pts = pd.read_parquet("data/processed/train_points_all.parquet")  # before label cleaning
     ax[2].hist(np.clip(pts.label_dist, 0, 100), bins=50, color="#4C72B0", log=True)
     ax[2].set(title="GPS distance to reference road (train)", xlabel="metres (clipped at 100)", ylabel="points (log)")
     plt.tight_layout(); plt.savefig(f"{PLOTS}/eda_distributions.png", dpi=130); plt.close()
@@ -54,15 +54,18 @@ def dataset_summary():
     plt.tight_layout(); plt.savefig(f"{PLOTS}/eda_candidate_miss_per_trip.png", dpi=130); plt.close()
 
 
-def trajectory_plot_and_map():
-    tid, tr, nd, ar, rt = load_trip(f"{RAW}/student_test/{MAP_TRIP}")
+def trajectory_plot_and_map(trip=MAP_TRIP):
+    tid, tr, nd, ar, rt = load_trip(f"{RAW}/student_test/{trip}")
     pad = 0.003
     box = ((nd.lon >= tr.lon.min() - pad) & (nd.lon <= tr.lon.max() + pad) &
            (nd.lat >= tr.lat.min() - pad) & (nd.lat <= tr.lat.max() + pad)).values
     near = ar[box[ar.u.values] & box[ar.v.values]]
-    pred = pd.read_csv(f"{MET}/student_test_predictions_{best_model()}.csv", dtype={"trip": str})
-    pred = pred[pred.trip == tid].sort_values("point")
-    pred_arcs = pred.arc.values[np.r_[True, pred.arc.values[1:] != pred.arc.values[:-1]]]
+    def pred_arcs(file):
+        pred = pd.read_csv(f"{MET}/{file}", dtype={"trip": str})
+        pred = pred[pred.trip == tid].sort_values("point")
+        return pred.arc.values[np.r_[True, pred.arc.values[1:] != pred.arc.values[:-1]]]
+    cls_arcs = pred_arcs("student_test_predictions_final_classifier.csv")
+    hmm_arcs = pred_arcs("student_test_predictions_hmm.csv")
 
     # static plot
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -81,23 +84,25 @@ def trajectory_plot_and_map():
     m = folium.Map(location=[tr.lat.mean(), tr.lon.mean()], zoom_start=14, tiles="OpenStreetMap")
     m.fit_bounds([[tr.lat.min(), tr.lon.min()], [tr.lat.max(), tr.lon.max()]])
     layers = {k: folium.FeatureGroup(name=k) for k in
-              ["Road network (nearby)", "Reference route", f"Predicted route ({best_model()})", "GPS observations"]}
+              ["Road network (nearby)", "GPS observations", "Reference route", "Classifier only", "Classifier + HMM"]}  # later layers are drawn on top
     for a in near.index.values[:6000]:
         folium.PolyLine([(nd.lat[ar.u[a]], nd.lon[ar.u[a]]), (nd.lat[ar.v[a]], nd.lon[ar.v[a]])],
                         color="#999999", weight=1).add_to(layers["Road network (nearby)"])
-    for arcs, name, col, w in [(rt, "Reference route", "green", 6), (pred_arcs, f"Predicted route ({best_model()})", "red", 3)]:
+    for arcs, name, col, w in [(rt, "Reference route", "green", 8), (cls_arcs, "Classifier only", "orange", 4),
+                               (hmm_arcs, "Classifier + HMM", "red", 3)]:
         for a in arcs:
             folium.PolyLine([(nd.lat[ar.u[a]], nd.lon[ar.u[a]]), (nd.lat[ar.v[a]], nd.lon[ar.v[a]])],
                             color=col, weight=w, opacity=0.8).add_to(layers[name])
     for lat, lon, t in tr[["lat", "lon", "t"]].values[::2]:
-        folium.CircleMarker((lat, lon), radius=2, color="blue", fill=True, popup=f"t={t:.0f}s").add_to(layers["GPS observations"])
+        folium.CircleMarker((lat, lon), radius=1.5, color="blue", fill=True, opacity=0.5, popup=f"t={t:.0f}s").add_to(layers["GPS observations"])
     for g in layers.values():
         g.add_to(m)
     folium.LayerControl(collapsed=False).add_to(m)
     m.get_root().html.add_child(folium.Element(
         '<div style="position:fixed;bottom:20px;left:20px;z-index:999;background:white;padding:8px;border:1px solid #999;'
         f'font-size:13px"><b>Trip {tid} (student-test)</b><br><span style="color:blue">&#9679;</span> GPS observations<br>'
-        '<span style="color:green">&#9644;</span> Reference route<br><span style="color:red">&#9644;</span> Predicted (classifier only)'
+        '<span style="color:green">&#9644;</span> Reference route<br><span style="color:orange">&#9644;</span> Classifier only'
+        '<br><span style="color:red">&#9644;</span> Classifier + HMM'
         '<br><span style="color:#999">&#9644;</span> Road network</div>'))
     m.save(f"{MAPS}/trip_{tid}_map.html")
 
@@ -125,6 +130,17 @@ def comparison_plots():
         plt.title(title); plt.xticks(rotation=15); plt.tight_layout()
         plt.savefig(f"{PLOTS}/{fn}", dpi=130); plt.close()
 
+    # the same four charts in one 2x2 panel (used in the PDF)
+    short = s.model.replace({"LogisticRegression": "LogReg", "DecisionTree": "DTree", "RandomForest": "RForest"})
+    fig, axes = plt.subplots(2, 2, figsize=(11, 6.5))
+    for ax, (col, err, title, _) in zip(axes.ravel(), specs):
+        b = ax.bar(short, s[col], yerr=s[err] if err else None, capsize=3, color=colors)
+        ax.bar_label(b, fmt="%.3f", fontsize=8)
+        if "log_loss" not in col:
+            ax.set_ylim(max(0, s[col].min() - 0.1), min(1.0, s[col].max() + 0.05))
+        ax.set_title(title, fontsize=10); ax.tick_params(labelsize=8)
+    plt.tight_layout(); plt.savefig(f"{PLOTS}/comparison_panel.png", dpi=130); plt.close()
+
     plt.figure(figsize=(7, 3.8))
     for i, (name, g) in enumerate(cv.groupby("model", sort=False)):
         plt.plot(g.fold, g.macro_f1, "o-", label=name, color=colors[i])
@@ -143,18 +159,11 @@ def comparison_plots():
     plt.tight_layout(); plt.savefig(f"{PLOTS}/confusion_matrices.png", dpi=130); plt.close()
 
 
-if __name__ == "__main__":
-    dataset_summary()
-    comparison_plots()
-    trajectory_plot_and_map()
-    print("plots ->", PLOTS, " map ->", MAPS)
-
-
-def screenshot_map():
+def screenshot_map(trip=MAP_TRIP):
     """Static PNG of the Folium map for the PDF (uses a headless Edge/Chrome if available)."""
     import subprocess, shutil
-    html = os.path.abspath(f"{MAPS}/trip_{MAP_TRIP}_map.html")
-    png = os.path.abspath(f"{PLOTS}/folium_trip_{MAP_TRIP}.png")
+    html = os.path.abspath(f"{MAPS}/trip_{trip}_map.html")
+    png = os.path.abspath(f"{PLOTS}/folium_trip_{trip}.png")
     for exe in [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
                 r"C:\Program Files\Google\Chrome\Application\chrome.exe"]:
         if os.path.exists(exe):
@@ -166,5 +175,24 @@ def screenshot_map():
     print("no browser screenshot available")
 
 
+def bayes_plot():
+    t = pd.read_csv(f"{MET}/bayes_trials.csv")
+    plt.figure(figsize=(7, 3.4))
+    plt.plot(t.number, t.value, "o", color="#4C72B0", label="trial (3-fold CV Top-1)")
+    plt.plot(t.number, t.value.cummax(), "-", color="#C44E52", label="best so far")
+    plt.scatter([0], [t.value.iloc[0]], s=80, facecolors="none", edgecolors="black", label="trial 0 = untuned config")
+    plt.xlabel("trial"); plt.ylabel("CV Top-1 accuracy"); plt.title("Bayesian optimisation (Optuna TPE) of XGBoost")
+    plt.legend(fontsize=8); plt.tight_layout(); plt.savefig(f"{PLOTS}/bayes_history.png", dpi=130); plt.close()
+
+
 if __name__ == "__main__":
-    screenshot_map()
+    dataset_summary()
+    comparison_plots()
+    bayes_plot()
+    for d in sorted(glob.glob(f"{RAW}/student_test/*")):  # one Folium map per student-testing trip
+        trajectory_plot_and_map(os.path.basename(d))
+    gains = pd.read_csv(f"{MET}/hmm_per_trip.csv", dtype={"trip": str})
+    biggest = gains.trip[(gains.hmm_top1 - gains.cls_top1).idxmax()]
+    for trip in {MAP_TRIP, biggest}:
+        screenshot_map(trip)
+    print("plots ->", PLOTS, " maps ->", MAPS, " largest HMM change:", biggest)

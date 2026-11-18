@@ -1,0 +1,21 @@
+final classifier: XGBoost
+ beta  w_emission  train_top1_hmm  train_top1_classifier_only
+    5         0.5        0.912841                    0.835676
+    3         0.5        0.910989                    0.835676
+    3         1.0        0.909136                    0.835676
+   10         0.5        0.908691                    0.835676
+    5         1.0        0.907337                    0.835676 
+(decoder tuning 42s)
+  00000000: top1 0.9365 -> 0.9656, continuity 0.9616 -> 0.9960
+  00000007: top1 0.9424 -> 0.9993, continuity 0.9948 -> 1.0000
+  00000009: top1 0.8541 -> 0.9085, continuity 0.8693 -> 0.9418
+  00000040: top1 0.9192 -> 0.9780, continuity 0.9633 -> 0.9960
+  00000052: top1 0.9580 -> 1.0000, continuity 0.9502 -> 0.9617
+  00000056: top1 0.8881 -> 0.9636, continuity 0.8848 -> 0.9661
+  00000065: top1 0.8255 -> 0.8867, continuity 0.9192 -> 0.9831
+  00000076: top1 0.8681 -> 0.9637, continuity 0.8815 -> 0.9670
+  00000077: top1 0.6998 -> 0.8844, continuity 0.9187 -> 0.9928
+  00000091: top1 0.8547 -> 0.9554, continuity 0.8820 -> 0.9714
+       method   top1  route_continuity  route_f1_mean  route_precision_mean  route_recall_mean
+ XGBoost only 0.8582            0.9228         0.8470                0.8200             0.8845
+XGBoost + HMM 0.9465            0.9821         0.9282                0.9585             0.9026

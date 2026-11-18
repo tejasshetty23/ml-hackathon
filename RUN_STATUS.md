@@ -1,61 +1,57 @@
-# RUN_STATUS — PathSnap first evaluation (18 Nov 2026)
+# RUN_STATUS — PathSnap (18 Nov 2026)
 
-## Completed
-- Dataset inspected: train = 80 trips / 208,417 GPS points; student_test = 10 trips / 19,160 points.
-  Evaluator-testing trips are **not** in the supplied zip (ids 15, 17, 23, 30, 49, 59, 67, 73, 87, 94 missing) — nothing of it was used.
-- Preprocessing: per-trip local metric projection, monotone alignment of GPS points to `.route` (labels),
-  candidates = arcs within 50 m, 8 nearest (shapely STRtree), 12 features. 1,085,227 train rows / 113,694 test rows.
-- Candidate miss rate: **train 0.1192**, **student_test 0.0041** (train is dominated by trips 2, 33, 54 which are offset/noisy).
-- 5 models trained with 5-fold GroupKFold (by trip) on train, refit on all train, evaluated on student_test, saved.
-- Saved models reload and predict (`tests/test_models_load.py`, log in `results/logs/tests.log`).
-- Plots, confusion matrices, Folium map, PDF report, TEAM_CONTRIBUTIONS.md.
-
-## Results (from `results/metrics/model_comparison.csv`)
-| Model | CV Macro F1 (mean ± std) | CV Top-1 | Test Top-1 | Test Macro F1 | Test Precision | Test Recall | Test Log Loss | Test Route continuity | Inference ms/point |
-|---|---|---|---|---|---|---|---|---|---|
-| Logistic Regression | 0.8735 ± 0.033 | 0.7459 | 0.8381 | 0.8871 | 0.8215 | 0.8020 | 0.1754 | 0.9111 | 0.001 |
-| KNN | 0.8839 ± 0.032 | 0.7439 | 0.8427 | 0.9026 | 0.8589 | 0.8164 | 0.2231 | 0.9134 | 0.840 |
-| Decision Tree | 0.8939 ± 0.032 | 0.7532 | 0.8515 | 0.9086 | 0.8526 | 0.8429 | 0.1292 | 0.9205 | 0.001 |
-| Random Forest | 0.8975 ± 0.031 | 0.7566 | 0.8531 | 0.9096 | 0.8799 | 0.8193 | 0.1232 | 0.9197 | 0.022 |
-| **XGBoost** | **0.8993 ± 0.030** | **0.7587** | **0.8546** | **0.9111** | 0.8680 | 0.8356 | **0.1198** | **0.9233** | 0.020 |
-
-Training time (clean sequential run, 8-core laptop, nothing else running):
-
-| Model | Mean CV fold fit (s) | Final fit on all 80 trips (s) |
+## Completed (all executed, all numbers from `results/metrics/`)
+| Component | Status | Evidence |
 |---|---|---|
-| Logistic Regression | 2.9 | 2.8 |
-| KNN (50k-row sample, lazy learner) | 0.06 | 0.04 |
-| Decision Tree | 9.4 | 11.6 |
-| Random Forest | 35.4 | 54.0 |
-| XGBoost | 27.1 | 37.8 |
+| Dataset exploration | done | `dataset_inventory.csv`, `dataset_summary.csv`, `results/plots/eda_*.png` |
+| Cleaning | done | `cleaning_report.csv`: 1,397 self-loop/zero-length arcs excluded; 20,550 training points (9.9%) with label > 100 m removed (train only); 0 invalid GPS rows |
+| Labels, candidates, features | done | train candidate miss rate 0.119 → 0.023 after cleaning; student_test 0.004 |
+| 5 models, 5-fold GroupKFold + student-test | done | `model_comparison.csv`, `cv_results.csv`, `student_test_results.csv` |
+| Bayesian optimisation (Optuna TPE, 12 trials) | done | `bayes_trials.csv`, `bayes_best.json`, `tuned_vs_untuned.csv`, `plots/bayes_history.png` |
+| HMM + Viterbi | done | `hmm_comparison.csv`, `hmm_per_trip.csv`, `hmm_grid.csv` |
+| XGBoost train/val loss curve | done | `xgb_learning_curve.csv`, `plots/xgb_learning_curve.png` |
+| Folium maps (all 10 student-test trips) | done | `results/maps/trip_<id>_map.html` |
+| FastAPI backend | done, tested | `api/main.py`, log `results/logs/api_server.log` |
+| Streamlit UI | done, tested | `ui/app.py`, `plots/ui_screenshot.png` |
+| Tests | pass | `results/logs/tests.log` |
+| Technical report | done | `reports/PathSnap_Technical_Report.pdf` (6 pages) |
 
-- Reference-route continuity on student_test (ceiling of the continuity metric): 0.9848.
-- Top-1 ceiling on student_test = 1 − miss rate = 0.9959.
-- Preliminary selection: **XGBoost** (best CV Top-1 = primary metric, best CV Macro F1, lowest log loss).
-- CV Top-1 is lower than test Top-1 because CV folds 3 and 4 contain the offset/noisy training trips (Top-1 ≈ 0.58–0.67 in those folds).
+## Results — classifiers (student-test = 10 trips; CV = 5-fold GroupKFold on 80 cleaned training trips)
+| Model | CV Macro F1 | CV Top-1 | Test Top-1 | Test Macro F1 | Log loss | Continuity | Infer ms/pt |
+|---|---|---|---|---|---|---|---|
+| Logistic Regression | 0.879 | 0.818 | 0.839 | 0.888 | 0.175 | 0.912 | 0.001 |
+| KNN | 0.892 | 0.817 | 0.843 | 0.902 | 0.213 | 0.909 | 1.721 |
+| Decision Tree | 0.900 | 0.828 | 0.851 | 0.908 | 0.130 | 0.921 | 0.002 |
+| Random Forest | 0.903 | 0.830 | 0.854 | 0.910 | 0.122 | 0.920 | 0.083 |
+| **XGBoost** | **0.904** | **0.832** | **0.858** | **0.912** | **0.119** | 0.923 | 0.050 |
+
+Bayesian tuning: CV Top-1 0.8321 (untuned) vs 0.8315 (tuned) → no accuracy gain; tuned model is ~6x faster.
+Final classifier = untuned XGBoost (selected on CV Top-1).
+
+## Results — route reconstruction (student-test)
+| Method | Top-1 | Route continuity | Route F1 |
+|---|---|---|---|
+| XGBoost only | 0.858 | 0.923 | 0.847 |
+| **XGBoost + HMM** (beta 5, w_e 0.5) | **0.947** | **0.982** | **0.928** |
+
+HMM improved all 10 student-test trips. Evaluator trips were not used anywhere.
 
 ## Artifacts
-- Models: `artifacts/models/{LogisticRegression,KNN,DecisionTree,RandomForest,XGBoost}.joblib`
-- Metrics: `results/metrics/model_comparison.csv`, `cv_results.csv`, `student_test_results.csv`,
-  `dataset_inventory.csv`, `dataset_summary.csv`, `confusion_*.npy`, `student_test_predictions_*.csv`
-- Plots: `results/plots/` · Map: `results/maps/trip_00000000_map.html` · Report: `reports/PathSnap_First_Evaluation.pdf`
-- Logs: `results/logs/preprocessing.log`, `training.log` (all 5 models, sequential run), `plots.log`, `tests.log`
+- `artifacts/models/{LogisticRegression,KNN,DecisionTree,RandomForest,XGBoost,XGBoost_tuned}.joblib`
+- `artifacts/final_config.json` — model file + HMM parameters loaded by the API
 
-## Reproduce (from `PathSnap/`)
-```
-py -3.13 -m pip install -r requirements.txt
-py -3.13 -m preprocessing.pipeline
-py -3.13 -m training.train_models            # or a subset, e.g.: py -3.13 -m training.train_models KNN
-py -3.13 -m visualisation.make_plots
-py -3.13 -m tests.test_models_load
-py -3.13 -m reports.build_report
-```
+## Reproduce / deploy
+See README.md (sections 2 and 3). Full order: `preprocessing.pipeline` → `training.train_models` →
+`training.tune_bayes` → `evaluation.hmm_eval` → `training.xgb_learning_curve` → `visualisation.make_plots` →
+`tests.test_models_load` → `reports.build_report`.
 
 ## Known issues / honest notes
-- Timings come from a clean sequential re-run (all 5 models one after another). An earlier run had KNN running in
-  parallel and inflated times; the re-run reproduced every accuracy/F1/log-loss value exactly (fixed seeds).
-- KNN is fitted on a 50,000-row random subsample (brute-force search) for speed.
-- The "train" overfitting check scores each refit model on 20 random training trips, not all 80.
-- Labels come from our alignment to the supplied route (reference information, not verified ground truth).
-- Duplicate u→v arcs mean a few GPS points have 2 positive candidates.
-- Not done yet (next phase, by design): Bayesian hyperparameter optimisation, HMM/Viterbi, FastAPI, UI, GitHub repo.
+- Bayesian tuning ran in parallel with training of Random Forest and XGBoost to save time, so the training times of
+  those two models (112 s, 81 s) and the first tuning trials are inflated by CPU sharing. LR, KNN and Decision Tree
+  timings, and all accuracy/F1/log-loss values, are unaffected (fixed seeds).
+- Tuning trials use a 25% sample of GPS points and 3-fold CV (time budget); the tuned-vs-untuned comparison uses the
+  full data and the same 5-fold CV.
+- KNN is fitted on a 50,000-row sample.
+- Labels come from our alignment of GPS to the supplied route (reference information, not verified ground truth).
+- Demo day: copy the evaluator trips to `data/evaluator_test/` on Laptop 1 and set `PATHSNAP_DATA_DIR` (README §3).
+  Take the required screenshots of the API console during the demo.

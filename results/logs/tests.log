@@ -1,6 +1,8 @@
-OK  LogisticRegression: loaded, mean prob on 2000 test rows = 0.2677
-OK  KNN: loaded, mean prob on 2000 test rows = 0.2708
-OK  DecisionTree: loaded, mean prob on 2000 test rows = 0.2681
-OK  RandomForest: loaded, mean prob on 2000 test rows = 0.2700
-OK  XGBoost: loaded, mean prob on 2000 test rows = 0.2694
-OK  preprocessing is deterministic; positives per point max = 2
+OK  LogisticRegression: loaded, mean prob on 2000 student-test rows = 0.2665
+OK  KNN: loaded, mean prob on 2000 student-test rows = 0.2712
+OK  DecisionTree: loaded, mean prob on 2000 student-test rows = 0.2691
+OK  RandomForest: loaded, mean prob on 2000 student-test rows = 0.2709
+OK  XGBoost: loaded, mean prob on 2000 student-test rows = 0.2696
+OK  XGBoost_tuned: loaded, mean prob on 2000 student-test rows = 0.2679
+OK  preprocessing is deterministic
+OK  route-free inference + HMM: 262 points decoded with XGBoost

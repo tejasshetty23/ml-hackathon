@@ -1,0 +1,23 @@
+{
+  "model_file": "artifacts/models/XGBoost.joblib",
+  "model_name": "XGBoost",
+  "hmm": {
+    "beta": 5.0,
+    "w_emission": 0.5,
+    "gap_s": 60.0
+  },
+  "features": [
+    "dist",
+    "dist_rank",
+    "dist_minus_best",
+    "heading_diff",
+    "heading_valid",
+    "speed",
+    "dt_prev",
+    "dt_next",
+    "arc_len",
+    "proj_frac",
+    "n_cands",
+    "two_way"
+  ]
+}
